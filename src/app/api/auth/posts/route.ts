@@ -3,7 +3,7 @@ import { Post } from "@/models/Post";
 import { getAuthenticatedUser, checkPermission } from "@/lib/permission";
 import { PERMISSIONS } from "@/constants/roles";
 
-function isPermissionError(error: unknown): boolean {
+function isPermissionError(error: unknown) {
   return error instanceof Error && error.message.includes("permission");
 }
 

@@ -4,6 +4,36 @@ import bcrypt from "bcryptjs";
 import { generateToken } from "@/lib/auth";
 import { ROLE_PERMISSIONS, ROLES } from "@/constants/roles";
 
+// Password validation rules
+function validatePassword(password: string): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  if (password.length < 8) {
+    errors.push("Password must be at least 8 characters");
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    errors.push("Password must contain at least 1 uppercase letter");
+  }
+
+  if (!/[a-z]/.test(password)) {
+    errors.push("Password must contain at least 1 lowercase letter");
+  }
+
+  if (!/\d/.test(password)) {
+    errors.push("Password must contain at least 1 number");
+  }
+
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    errors.push("Password must contain at least 1 special character");
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
 export async function POST(req: Request) {
   try {
     await connectDB();
@@ -14,6 +44,31 @@ export async function POST(req: Request) {
     if (!name || !email || !password) {
       return Response.json(
         { error: "Name, email, and password required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate name
+    if (typeof name !== "string" || name.trim().length < 2) {
+      return Response.json(
+        { error: "Name must be at least 2 characters" },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return Response.json(
+        { error: "Invalid email format" },
+        { status: 400 }
+      );
+    }
+
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      return Response.json(
+        { error: passwordValidation.errors.join("; ") },
         { status: 400 }
       );
     }

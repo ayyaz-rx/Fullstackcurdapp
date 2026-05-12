@@ -5,8 +5,9 @@ import { User } from "@/models/users";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   try {
     await connectDB();
 
@@ -52,7 +53,7 @@ export async function PATCH(
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      params.id,
+      id,
       { name },
       { new: true }
     ).select("-password");

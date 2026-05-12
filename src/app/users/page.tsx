@@ -112,14 +112,19 @@ export default function UsersPage() {
         credentials: "include",
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (res.ok) {
         setUsers((prev) => prev.filter((u) => u._id !== userId));
         toast.success("User deleted");
       } else {
-        toast.error("Delete failed");
+        const errorMsg = data.error || "Failed to delete user";
+        toast.error(errorMsg);
+        console.error("Delete error:", data);
       }
-    } catch {
+    } catch (error) {
       toast.error("Error deleting user");
+      console.error("Delete exception:", error);
     } finally {
       setDeletingId(null);
     }

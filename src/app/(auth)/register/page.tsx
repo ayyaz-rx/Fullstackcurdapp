@@ -5,13 +5,31 @@ import type { FormEvent } from "react";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { useRouter } from "next/navigation";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiCheck, FiX } from "react-icons/fi";
+
+// Password validation rules
+const PASSWORD_RULES = {
+  minLength: { regex: /.{8,}/, label: "At least 8 characters" },
+  uppercase: { regex: /[A-Z]/, label: "At least 1 uppercase letter" },
+  lowercase: { regex: /[a-z]/, label: "At least 1 lowercase letter" },
+  number: { regex: /\d/, label: "At least 1 number" },
+  special: { regex: /[!@#$%^&*(),.?":{}|<>]/, label: "At least 1 special character" },
+};
+
+function validatePassword(password: string) {
+  return Object.entries(PASSWORD_RULES).map(([key, rule]) => ({
+    key,
+    label: rule.label,
+    valid: rule.regex.test(password),
+  }));
+}
+
+function isPasswordValid(password: string) {
+  return validatePassword(password).every((rule) => rule.valid);
+}
 
 export default function Register() {
   const router = useRouter();
-
-  const passwordPattern =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
   const namePattern = /^[A-Za-z]+(?:\s+[A-Za-z]+)*$/;
 
@@ -22,6 +40,8 @@ export default function Register() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordRules, setShowPasswordRules] = useState(false);
+  const [passwordValidation, setPasswordValidation] = useState(validatePassword(""));
 
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({
@@ -63,9 +83,8 @@ export default function Register() {
 
     if (!form.password) {
       nextErrors.password = "Password is required";
-    } else if (!passwordPattern.test(form.password)) {
-      nextErrors.password =
-        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character";
+    } else if (!isPasswordValid(form.password)) {
+      nextErrors.password = "Password does not meet all requirements";
     }
 
     setFieldErrors(nextErrors);
@@ -173,9 +192,12 @@ export default function Register() {
                 placeholder="Enter your password"
                 type={showPassword ? "text" : "password"}
                 value={form.password}
-                onChange={(e) =>
-                  setForm({ ...form, password: e.target.value })
-                }
+                onChange={(e) => {
+                  const newPassword = e.target.value;
+                  setForm({ ...form, password: newPassword });
+                  setPasswordValidation(validatePassword(newPassword));
+                }}
+                onFocus={() => setShowPasswordRules(true)}
                 required
                 className="pr-10"
               />
@@ -188,6 +210,27 @@ export default function Register() {
               </span>
             </div>
 
+            {/* Password Rules Checklist */}
+            {showPasswordRules && form.password && (
+              <div className="mt-3 rounded border border-gray-200 bg-gray-50 p-3">
+                <p className="mb-2 text-xs font-semibold text-gray-700">Password Requirements:</p>
+                <div className="space-y-1">
+                  {passwordValidation.map((rule) => (
+                    <div key={rule.key} className="flex items-center gap-2 text-xs">
+                      {rule.valid ? (
+                        <FiCheck className="text-green-600" size={14} />
+                      ) : (
+                        <FiX className="text-red-600" size={14} />
+                      )}
+                      <span className={rule.valid ? "text-green-600" : "text-gray-600"}>
+                        {rule.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {fieldErrors.password && (
               <p className="mt-1 text-sm text-red-600">
                 {fieldErrors.password}
@@ -198,7 +241,7 @@ export default function Register() {
           <Button
             type="submit"
             className="w-full mt-6"
-            disabled={loading}
+            disabled={loading || !isPasswordValid(form.password)}
           >
             {loading ? "Registering..." : "Register"}
           </Button>

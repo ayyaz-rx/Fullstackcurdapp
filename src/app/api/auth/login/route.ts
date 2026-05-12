@@ -36,10 +36,10 @@ export async function POST(req: Request) {
     }
 
     const token = generateToken(user._id.toString());
-    const userPermissions =
+    const userPermissions: string[] =
       Array.isArray(user.permissions) && user.permissions.length > 0
-        ? user.permissions
-        : ROLE_PERMISSIONS[user.role] || [];
+        ? (user.permissions as string[])
+        : (ROLE_PERMISSIONS[user.role] as string[]) || [];
 
     // LOGIN SUCCESS LOGS
     const timestamp = new Date().toLocaleString("en-PK");
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     console.log("Created At:", new Date(user.createdAt).toLocaleString("en-PK"));
 
     console.log("Permissions:");
-    userPermissions.forEach((perm) => {
+    userPermissions.forEach((perm: string) => {
       console.log(" -", perm);
     });
 

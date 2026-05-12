@@ -3,18 +3,13 @@ import { User } from "@/models/users";
 import { getAuthenticatedUser, checkPermission } from "@/lib/permission";
 import { PERMISSIONS, ROLE_PERMISSIONS, ROLES, type Role } from "@/constants/roles";
 
-type RouteContext = {
-  params?: { id?: string } | Promise<{ id?: string }>;
-};
-
 function isPermissionError(error: unknown): boolean {
   return error instanceof Error && error.message.includes("does not have permission");
 }
 
-export async function PUT(req: Request, { params }: RouteContext) {
+export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
-    const resolvedParams = await Promise.resolve(params);
-    const userId = resolvedParams?.id;
+    const { id: userId } = await context.params;
 
     if (!userId) {
       return Response.json({ error: "Invalid user id" }, { status: 400 });

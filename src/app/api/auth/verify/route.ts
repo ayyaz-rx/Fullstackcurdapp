@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
     const userId =
       typeof decoded === "object" && decoded !== null && "id" in decoded
-        ? String(decoded.id)
+        ? String((decoded as any).id)
         : null;
 
     if (!userId) {

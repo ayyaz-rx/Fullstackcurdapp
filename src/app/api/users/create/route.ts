@@ -4,6 +4,36 @@ import { getAuthenticatedUser } from "@/lib/permission";
 import { ROLE_PERMISSIONS, ROLES, type Role } from "@/constants/roles";
 import bcrypt from "bcryptjs";
 
+// Password validation function
+function validatePassword(password: string): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  if (password.length < 8) {
+    errors.push("Password must be at least 8 characters");
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    errors.push("Password must contain at least one capital letter (A-Z)");
+  }
+
+  if (!/[a-z]/.test(password)) {
+    errors.push("Password must contain at least one small letter (a-z)");
+  }
+
+  if (!/\d/.test(password)) {
+    errors.push("Password must contain at least one number (0-9)");
+  }
+
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    errors.push("Password must contain at least one special character (!@#$%...)");
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
 export async function POST(req: Request) {
   try {
     await connectDB();
@@ -60,10 +90,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // Validate password length
-    if (password.length < 8) {
+    // Validate password strength
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
       return Response.json(
-        { error: "Password must be at least 8 characters" },
+        { error: passwordValidation.errors.join("; ") },
         { status: 400 }
       );
     }

@@ -4,18 +4,32 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
 import toast from "react-hot-toast";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import type { IUser } from "@/type";
+
+// Password validation pattern
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
+function isPasswordValid(password: string): boolean {
+  return passwordPattern.test(password);
+}
 
 export default function CreateUserPage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     role: "viewer",
+  });
+  const [fieldErrors, setFieldErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
   });
 
   useEffect(() => {
@@ -52,8 +66,38 @@ export default function CreateUserPage() {
     const email = formData.email.trim();
     const password = formData.password.trim();
 
-    if (!name || !email || !password) {
-      toast.error("Name, email, and password are required");
+    const errors = {
+      name: "",
+      email: "",
+      password: "",
+    };
+
+    // Validate name
+    if (!name) {
+      errors.name = "Name is required";
+    } else if (name.length < 2) {
+      errors.name = "Name must be at least 2 characters";
+    }
+
+    // Validate email
+    if (!email) {
+      errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = "Enter a valid email";
+    }
+
+    // Validate password
+    if (!password) {
+      errors.password = "Password is required";
+    } else if (!isPasswordValid(password)) {
+      errors.password =
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character";
+    }
+
+    setFieldErrors(errors);
+
+    // If there are errors, don't proceed
+    if (errors.name || errors.email || errors.password) {
       return;
     }
 
@@ -117,6 +161,9 @@ export default function CreateUserPage() {
               placeholder="Enter user name"
               disabled={isCreating}
             />
+            {fieldErrors.name && (
+              <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
+            )}
           </div>
 
           <div>
@@ -129,18 +176,32 @@ export default function CreateUserPage() {
               placeholder="Enter user email"
               disabled={isCreating}
             />
+            {fieldErrors.email && (
+              <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
+            )}
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">Password</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
-              className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Enter password"
-              disabled={isCreating}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={formData.password}
+                onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
+                className="w-full rounded border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="Enter password"
+                disabled={isCreating}
+              />
+              <span
+                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-600"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </span>
+            </div>
+            {fieldErrors.password && (
+              <p className="mt-1 text-sm text-red-600">{fieldErrors.password}</p>
+            )}
           </div>
 
           <div>

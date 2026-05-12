@@ -4,13 +4,9 @@ import { getAuthenticatedUser, checkPermission } from "@/lib/permission";
 import { PERMISSIONS } from "@/constants/roles";
 import mongoose from "mongoose";
 
-type RouteContext = {
-  params?: { id?: string } | Promise<{ id?: string }>;
-};
-
-async function resolvePostId(context: RouteContext): Promise<string | null> {
-  const params = await Promise.resolve(context?.params);
-  const id = params?.id;
+async function resolvePostId(context: { params: Promise<{ id: string }> }): Promise<string | null> {
+  const params = await context.params;
+  const id = params.id;
   return typeof id === "string" && id.trim().length > 0 ? id : null;
 }
 
@@ -22,7 +18,7 @@ function isPermissionError(error: unknown): boolean {
 }
 
 //  GET single post
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const postId = await resolvePostId(context);
 
@@ -59,7 +55,7 @@ export async function GET(_: Request, context: RouteContext) {
 }
 
 //  UPDATE POST
-export async function PUT(req: Request, context: RouteContext) {
+export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const postId = await resolvePostId(context);
 
@@ -127,7 +123,7 @@ export async function PUT(req: Request, context: RouteContext) {
 }
 
 //  DELETE POST
-export async function DELETE(req: Request, context: RouteContext) {
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const postId = await resolvePostId(context);
 

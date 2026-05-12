@@ -2,14 +2,12 @@ import { connectDB } from "@/lib/db";
 import { User } from "@/models/users";
 import { getAuthenticatedUser } from "@/lib/permission";
 
-type RouteContext = {
-  params?: { id?: string } | Promise<{ id?: string }>;
-};
-
-export async function DELETE(req: Request, { params }: RouteContext) {
+export async function DELETE(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const resolvedParams = await Promise.resolve(params);
-    const userId = resolvedParams?.id;
+    const { id: userId } = await context.params;
 
     if (!userId) {
       return Response.json({ error: "Invalid user id" }, { status: 400 });
