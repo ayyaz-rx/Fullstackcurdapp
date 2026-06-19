@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import Button from "@/components/Button";
@@ -152,6 +153,12 @@ export default function Login() {
                 {fieldErrors.password}
               </p>
             )}
+
+            <div className="mt-2 text-right">
+              <Link href="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+                Forgot Password?
+              </Link>
+            </div>
           </div>
 
           <Button type="submit" className="w-full mt-6" disabled={loading}>
