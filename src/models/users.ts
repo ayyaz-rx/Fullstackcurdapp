@@ -5,6 +5,8 @@ const UserSchema = new mongoose.Schema({
   name: String,
   email: { type: String, unique: true, required: true },
   password: String,
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordExpire: { type: Date, default: null },
   isSuperAdmin: { type: Boolean, default: false },
   permissions: { type: [String], default: [] },
   role: {

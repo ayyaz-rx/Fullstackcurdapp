@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import Button from "@/components/Button";
@@ -108,15 +108,11 @@ export default function Login() {
               placeholder="Enter your email"
               type="email"
               value={form.email}
-              onChange={(e) =>
-                setForm({ ...form, email: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
             />
             {fieldErrors.email && (
-              <p className="mt-1 text-sm text-red-600">
-                {fieldErrors.email}
-              </p>
+              <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
             )}
           </div>
 
@@ -131,9 +127,7 @@ export default function Login() {
                 placeholder="Enter your password"
                 type={showPassword ? "text" : "password"}
                 value={form.password}
-                onChange={(e) =>
-                  setForm({ ...form, password: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
                 required
                 className="pr-10"
               />
@@ -153,6 +147,9 @@ export default function Login() {
               </p>
             )}
           </div>
+          <Link href="/forgot-password" className="text-blue-600 text-sm">
+            Forgot Password?
+          </Link>
 
           <Button type="submit" className="w-full mt-6" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
